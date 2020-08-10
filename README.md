@@ -41,25 +41,27 @@ see `EXT:container_example` for a simple usage of a custom container.
 
 This is an example for create a 2 column container
 
-    \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\B13\Container\Tca\Registry::class)->addContainer(
-        'b13-2cols-with-header-container', // CType
-        '2 Column Container With Header', // label
-        'Some Description of the Container', // description
+```php
+\TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\B13\Container\Tca\Registry::class)->addContainer(
+    'b13-2cols-with-header-container', // CType
+    '2 Column Container With Header', // label
+    'Some Description of the Container', // description
+    [
         [
-            [
-                ['name' => 'header', 'colPos' => 200, 'colspan' => 2, 'allowed' => ['CType' => 'header, textmedia']] // rowspan also supported
-            ],
-            [
-                ['name' => 'left side', 'colPos' => 201],
-                ['name' => 'right side', 'colPos' => 202]
-            ]
-        ], // grid configuration
-        'EXT:container/Resources/Public/Icons/Extension.svg', // icon file, or existing icon identifier
-        'EXT:container/Resources/Private/Templates/Container.html', // Template for Backend View
-        'EXT:container/Resources/Private/Templates/Grid.html', // Template for Grid
-        true, // saveAndClose for new content element wizard (v10 only)
-        true // register in new content element wizard
-    );
+            ['name' => 'header', 'colPos' => 200, 'colspan' => 2, 'allowed' => ['CType' => 'header, textmedia']] // rowspan also supported
+        ],
+        [
+            ['name' => 'left side', 'colPos' => 201],
+            ['name' => 'right side', 'colPos' => 202]
+        ]
+    ], // grid configuration
+    'EXT:container/Resources/Public/Icons/Extension.svg', // icon file, or existing icon identifier
+    'EXT:container/Resources/Private/Templates/Container.html', // Template for Backend View
+    'EXT:container/Resources/Private/Templates/Grid.html', // Template for Grid
+    true, // saveAndClose for new content element wizard (v10 only)
+    true // register in new content element wizard
+);
+```
 
 __Notes__
 - if EXT:content_defender is installed allowed-CType parameter in column Configuration can be configured to restrict allowed CTypes in a container column
@@ -69,6 +71,13 @@ __Notes__
   - Adds PageTSconfig for newContentElement.wizardItems
   - Sets ``showitem`` for this CType (to: `sys_language_uid,CType,tx_container_parent,colPos,hidden`)
   - Saves the Configuration in TCA in ``$GLOBALS['TCA']['tt_content']['containerConfiguration'][<CType>]`` for further usage
+- We provide some default icons you can use, see `Resources/Public/Icons`
+  - container-1col
+  - container-2col
+  - container-2col-left
+  - container-2col-right
+  - container-3col
+  - container-4col 
 
 ### TypoScript
 
@@ -108,21 +117,22 @@ __Notes__
 
 ### Template
 
-    <f:for each="{children_100}" as="record">
-        {record.header} <br>
-        <f:format.raw>
-            {record.renderedContent}
-        </f:format.raw>
-    </f:for>
+```html
+<f:for each="{children_100}" as="record">
+    {record.header} <br>
+    <f:format.raw>
+        {record.renderedContent}
+    </f:format.raw>
+</f:for>
 
-    <f:for each="{children_101}" as="record">
-        {record.header} <br>
-        <f:format.raw>
-            {record.renderedContent}
-        </f:format.raw>
-    </f:for>
-
-with explicit colPos defined use '{children<Left|Right>}' as set in the example above
+<f:for each="{children_101}" as="record">
+    {record.header} <br>
+    <f:format.raw>
+        {record.renderedContent}
+    </f:format.raw>
+</f:for>
+```
+with explicit colPos defined use `{children<Left|Right>}` as set in the example above
 
 ## Concepts
 - Complete Registration is done with one PHP call to TCA Registry
@@ -138,7 +148,7 @@ with explicit colPos defined use '{children<Left|Right>}' as set in the example 
 - Integrity proofment
 - List module actions
 
-## Extension Tests
+## Extension Tests and Coding Guidelines
 
 You can run our test suite for this extension yourself:
 
@@ -147,8 +157,15 @@ You can run our test suite for this extension yourself:
 - run `Build/Scripts/runTests.sh -s functional`
 - run `Build/Scripts/runTests.sh -s acceptance`
 
+and assure Coding Guidelines are fullfilled:
+
+- run ``.Build/bin/phpstan analyse -c Resources/Private/Configuration/phpstan.neon``
+- run ``.Build/bin/php-cs-fixer fix --config=.Build/vendor/typo3/coding-standards/templates/extension_php_cs.dist --dry-run --stop-on-violation --using-cache=no .``
+
 ## Credits
 
 This extension was created by Achim Fritz in 2020 for [b13 GmbH, Stuttgart](https://b13.com).
 
-[Find more TYPO3 extensions we have developed](https://b13.com/useful-typo3-extensions-from-b13-to-you) that help us deliver value in client projects. As part of the way we work, we focus on testing and best practices to ensure long-term performance, reliability, and results in all our code..
+Find examples and use cases and best practices for this extension in our [Container blog series on b13.com](https://b13.com/blog/flexible-containers-and-grids-for-typo3).
+
+[Find more TYPO3 extensions we have developed](https://b13.com/useful-typo3-extensions-from-b13-to-you) that help us deliver value in client projects. As part of the way we work, we focus on testing and best practices to ensure long-term performance, reliability, and results in all our code.

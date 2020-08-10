@@ -10,18 +10,18 @@ namespace B13\Container\View;
  * of the License, or any later version.
  */
 
-use B13\Container\Tca\Registry;
-use TYPO3\CMS\Backend\View\PageLayoutView;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Backend\Utility\BackendUtility;
-use TYPO3\CMS\Backend\Routing\UriBuilder;
-use TYPO3\CMS\Core\Imaging\Icon;
-use TYPO3\CMS\Core\Utility\StringUtility;
-use TYPO3\CMS\Core\Type\Bitmask\Permission;
-use TYPO3\CMS\Core\Versioning\VersionState;
 use B13\Container\Domain\Factory\ContainerFactory;
 use B13\Container\Domain\Model\Container;
+use B13\Container\Tca\Registry;
 use Psr\EventDispatcher\EventDispatcherInterface;
+use TYPO3\CMS\Backend\Routing\UriBuilder;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Backend\View\PageLayoutView;
+use TYPO3\CMS\Core\Imaging\Icon;
+use TYPO3\CMS\Core\Type\Bitmask\Permission;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\StringUtility;
+use TYPO3\CMS\Core\Versioning\VersionState;
 
 class ContainerLayoutView extends PageLayoutView
 {
@@ -29,23 +29,35 @@ class ContainerLayoutView extends PageLayoutView
     /**
      * @var ContainerFactory
      */
-    protected $containerFactory = null;
+    protected $containerFactory;
 
     /**
      * @var Registry
      */
-    protected $registry = null;
+    protected $registry;
 
     /**
      * @var Container
      */
-    protected $container = null;
+    protected $container;
 
+    /**
+     * variable and calls can be dropped on v10
+     * @var int
+     */
+    public $counter = 0;
+
+    /**
+     * variable and calls can be dropped on v10
+     * @var int
+     */
+    public $nextThree = 3;
 
     /**
      * ContainerLayoutView constructor.
      * @param EventDispatcherInterface|null $eventDispatcher
      * @param ContainerFactory|null $containerFactory
+     * @param Registry|null $registry
      */
     public function __construct(EventDispatcherInterface $eventDispatcher = null, ContainerFactory $containerFactory = null, Registry $registry = null)
     {
@@ -59,7 +71,6 @@ class ContainerLayoutView extends PageLayoutView
         }
     }
 
-
     /**
      * @param int $uid
      * @param int $colPos
@@ -67,7 +78,6 @@ class ContainerLayoutView extends PageLayoutView
      */
     public function renderContainerChildren(int $uid, int $colPos): string
     {
-
         $this->initWebLayoutModuleData();
         $this->initLabels();
 
@@ -83,9 +93,6 @@ class ContainerLayoutView extends PageLayoutView
         return $content;
     }
 
-    /**
-     * @return void
-     */
     protected function initLabels(): void
     {
         $this->CType_labels = [];
@@ -144,9 +151,6 @@ class ContainerLayoutView extends PageLayoutView
         return $url;
     }
 
-    /**
-     * @return void
-     */
     protected function initWebLayoutModuleData(): void
     {
         $webLayoutModuleData = BackendUtility::getModuleData([], [], 'web_layout');
@@ -160,20 +164,19 @@ class ContainerLayoutView extends PageLayoutView
      *
      * @param string $table Table name
      * @param array $row Record array
-     * @param string $enabledClickMenuItems Passthrough to wrapClickMenuOnIcon
+     * @param string $enabledClickMenuItems remove after v9 support
      * @return string HTML for the icon
      */
     public function getIcon($table, $row, $enabledClickMenuItems = '')
     {
         if ($this->isLanguageEditable()) {
-            return parent::getIcon($table, $row, $enabledClickMenuItems);
-        } else {
-            $toolTip = BackendUtility::getRecordToolTip($row, 'tt_content');
-            $icon = '<span ' . $toolTip . '>' . $this->iconFactory->getIconForRecord($table, $row, Icon::SIZE_SMALL)->render() . '</span>';
-            $this->counter++;
-            // do not render click-menu
-            return $icon;
+            return parent::getIcon($table, $row);
         }
+        $toolTip = BackendUtility::getRecordToolTip($row, 'tt_content');
+        $icon = '<span ' . $toolTip . '>' . $this->iconFactory->getIconForRecord($table, $row, Icon::SIZE_SMALL)->render() . '</span>';
+        $this->counter++;
+        // do not render click-menu
+        return $icon;
     }
 
     /**
@@ -183,7 +186,6 @@ class ContainerLayoutView extends PageLayoutView
     {
         return $this->container->getLanguage() === 0 || !$this->container->isConnectedMode();
     }
-
 
     /**
      * @param int $colPos
@@ -305,5 +307,4 @@ class ContainerLayoutView extends PageLayoutView
 
         return $head . $content;
     }
-
 }

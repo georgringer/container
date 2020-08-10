@@ -1,8 +1,7 @@
 <?php
 
-
 $EM_CONF[$_EXTKEY] = [
-    'title' => 'Container',
+    'title' => 'Container Content Elements',
     'description' => 'Create Custom Container Content Elements for TYPO3',
     'category' => 'misc',
     'author' => 'b13 GmbH',
@@ -12,11 +11,10 @@ $EM_CONF[$_EXTKEY] = [
     'uploadfolder' => false,
     'createDirs' => '',
     'clearCacheOnLoad' => true,
-    'version' => '1.0.0',
+    'version' => '1.1.1',
     'constraints' => [
         'depends' => ['typo3' => '9.5.0-10.4.99'],
         'conflicts' => [],
         'suggests' => []
     ]
 ];
-

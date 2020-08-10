@@ -1,6 +1,8 @@
 <?php
 
-namespace  B13\Container\ContentDefender\Hooks;
+declare(strict_types=1);
+
+namespace B13\Container\ContentDefender\Hooks;
 
 /*
  * This file is part of TYPO3 CMS-based extension "container" by b13.
@@ -10,31 +12,31 @@ namespace  B13\Container\ContentDefender\Hooks;
  * of the License, or any later version.
  */
 
+use B13\Container\Domain\Factory\ContainerFactory;
 use B13\Container\Domain\Factory\Exception;
+use B13\Container\Hooks\Datahandler\Database;
 use B13\Container\Tca\Registry;
+use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use B13\Container\Domain\Factory\ContainerFactory;
-use TYPO3\CMS\Core\DataHandling\DataHandler;
-use B13\Container\Hooks\Datahandler\Database;
 
 class CommandMapHook
 {
     /**
      * @var Registry
      */
-    protected $tcaRegistry = null;
+    protected $tcaRegistry;
 
     /**
      * @var ContainerFactory
      */
-    protected $containerFactory = null;
+    protected $containerFactory;
 
     /**
      * @var Database
      */
-    protected $database = null;
+    protected $database;
 
     /**
      * @param ContainerFactory|null $containerFactory
@@ -55,7 +57,6 @@ class CommandMapHook
     {
         if (!empty($dataHandler->cmdmap['tt_content'])) {
             foreach ($dataHandler->cmdmap['tt_content'] as $id => $cmds) {
-
                 foreach ($cmds as $cmd => $data) {
                     if (
                         ($cmd === 'copy' || $cmd === 'move') &&
@@ -75,23 +76,20 @@ class CommandMapHook
                             $container = $this->containerFactory->buildContainer($parent);
                             $cType = $container->getCType();
                             $allowedConfiguration = $this->tcaRegistry->getAllowedConfiguration($cType, $colPos);
-                            $allowed = true;
                             foreach ($allowedConfiguration as $field => $value) {
                                 $allowedValues = GeneralUtility::trimExplode(',', $value);
                                 if (in_array($recordCType, $allowedValues) === false) {
-                                    $allowed = false;
+                                    $msg = $recordCType . ' is not allowed in ' . $cType . ' on colPos ' . $colPos;
+                                    $flashMessage = GeneralUtility::makeInstance(FlashMessage::class, $msg, '', FlashMessage::ERROR, true);
+                                    $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
+                                    $defaultFlashMessageQueue = $flashMessageService->getMessageQueueByIdentifier();
+                                    $defaultFlashMessageQueue->enqueue($flashMessage);
+                                    unset($dataHandler->cmdmap['tt_content'][$id][$cmd]);
+                                    if (count($dataHandler->cmdmap['tt_content'][$id]) === 0) {
+                                        unset($dataHandler->cmdmap['tt_content'][$id]);
+                                    }
+                                    continue;
                                 }
-                            }
-                            if ($allowed === false) {
-                                unset($dataHandler->cmdmap['tt_content'][$id][$cmd]);
-                                if (count($dataHandler->cmdmap['tt_content'][$id]) === 0) {
-                                    unset($dataHandler->cmdmap['tt_content'][$id]);
-                                }
-                                $msg = 'not allowed';
-                                $flashMessage = GeneralUtility::makeInstance(FlashMessage::class, $msg, '', FlashMessage::ERROR, true);
-                                $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
-                                $defaultFlashMessageQueue = $flashMessageService->getMessageQueueByIdentifier();
-                                $defaultFlashMessageQueue->enqueue($flashMessage);
                             }
                         } catch (Exception $e) {
                             // not a container
@@ -101,5 +99,4 @@ class CommandMapHook
             }
         }
     }
-
 }

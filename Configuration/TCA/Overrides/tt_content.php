@@ -1,6 +1,6 @@
 <?php
 
-call_user_func(function () {
+call_user_func(static function () {
     $additionalColumns = [
         'tx_container_parent' => [
             'label' => 'Container',
@@ -17,12 +17,10 @@ call_user_func(function () {
         ]
     ];
 
-
     \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns(
         'tt_content',
-         $additionalColumns
+        $additionalColumns
     );
-
 
     \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addFieldsToPalette(
         'tt_content',
@@ -36,7 +34,4 @@ call_user_func(function () {
     // useColumnsForDefaultValues colPos,sys_language_uid,CType
     // new element
     $GLOBALS['TCA']['tt_content']['ctrl']['useColumnsForDefaultValues'] .= ',tx_container_parent';
-    // change properties in translation when move default element
-    // move child outside container reset parent
-    $GLOBALS['TCA']['tt_content']['ctrl']['copyAfterDuplFields'] .= ',tx_container_parent';
 });

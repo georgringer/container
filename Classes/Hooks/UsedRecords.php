@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace B13\Container\Hooks;
 
 /*
@@ -12,9 +14,9 @@ namespace B13\Container\Hooks;
 
 use B13\Container\Domain\Factory\ContainerFactory;
 use B13\Container\Domain\Factory\Exception;
+use B13\Container\Tca\Registry;
 use TYPO3\CMS\Backend\View\PageLayoutView;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use B13\Container\Tca\Registry;
 
 class UsedRecords
 {
@@ -22,12 +24,12 @@ class UsedRecords
     /**
      * @var Registry
      */
-    protected $tcaRegistry = null;
+    protected $tcaRegistry;
 
     /**
      * @var ContainerFactory
      */
-    protected $containerFactory = null;
+    protected $containerFactory;
 
     /**
      * UsedRecords constructor.
@@ -50,7 +52,7 @@ class UsedRecords
         $record = $params['record'];
         if ($record['tx_container_parent'] > 0) {
             try {
-                $container = $this->containerFactory->buildContainer($record['tx_container_parent']);
+                $container = $this->containerFactory->buildContainer((int)$record['tx_container_parent']);
                 $columns = $this->tcaRegistry->getAvailableColumns($container->getCType());
                 foreach ($columns as $column) {
                     if ($column['colPos'] === $record['colPos']) {
@@ -59,7 +61,6 @@ class UsedRecords
                 }
                 return false;
             } catch (Exception $e) {
-
             }
         }
         return $params['used'];

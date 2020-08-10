@@ -1,5 +1,6 @@
 <?php
-declare(strict_types = 1);
+
+declare(strict_types=1);
 namespace B13\Container\Tests\Acceptance\Backend;
 
 /*
@@ -13,10 +14,8 @@ namespace B13\Container\Tests\Acceptance\Backend;
 use B13\Container\Tests\Acceptance\Support\BackendTester;
 use B13\Container\Tests\Acceptance\Support\PageTree;
 
-
 class LayoutCest
 {
-
 
     /**
      * @param BackendTester $I
@@ -48,7 +47,6 @@ class LayoutCest
         $I->see('header-header-1');
         $I->dontSee('2cols-header-0');
         $I->dontSee('header-header-0');
-
 
         $I->selectOption('select[name="actionMenu"]', 'Languages');
         $I->waitForElementNotVisible('#t3js-ui-block');
@@ -86,8 +84,6 @@ class LayoutCest
         $I->waitForElementNotVisible('#t3js-ui-block');
         $I->dontSee('Content', '#element-tt_content-102');
     }
-
-
 
     /**
      * @param BackendTester $I
@@ -193,4 +189,21 @@ class LayoutCest
         $I->see('german', $selecor);
     }
 
+    /**
+     * @param BackendTester $I
+     * @param PageTree $pageTree
+     * @throws \Exception
+     */
+    public function canTranslateChild(BackendTester $I, PageTree $pageTree): void
+    {
+        $I->click('Page');
+        $pageTree->openPath(['home', 'pageWithTranslatedContainer']);
+        $I->wait(0.2);
+        $I->switchToContentFrame();
+
+        $I->click('headerOfChild', '#element-tt_content-212');
+
+        $I->selectOption('select[name="_langSelector"]', 'german [NEW]');
+        $I->see('[Translate to language-1:] headerOfChild');
+    }
 }

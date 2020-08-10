@@ -1,14 +1,15 @@
 <?php
+
 defined('TYPO3_MODE') || die('Access denied.');
 
-call_user_func(function () {
+call_user_func(static function () {
     \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Extbase\SignalSlot\Dispatcher::class)->connect(
         \TYPO3\CMS\Backend\Utility\BackendUtility::class,
         'getPagesTSconfigPreInclude',
         B13\Container\Tca\Registry::class,
         'addPageTS'
     );
-    
+
     // draw container grid
     $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['cms/layout/class.tx_cms_layout.php']['tt_content_drawItem'][] =
         \B13\Container\Hooks\DrawItem::class;
@@ -47,10 +48,31 @@ call_user_func(function () {
     $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass']['tx_container-after-finish'] =
         \B13\Container\Hooks\Datahandler\CommandMapAfterFinishHook::class;
 
+    // register default icons
+    $iconRegistry = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+        \TYPO3\CMS\Core\Imaging\IconRegistry::class
+    );
+    $iconsToRegister = [
+        'container-1col',
+        'container-2col',
+        'container-2col-left',
+        'container-2col-right',
+        'container-3col',
+        'container-4col',
+    ];
+    foreach ($iconsToRegister as $icon) {
+        $iconRegistry->registerIcon(
+            $icon,
+            \TYPO3\CMS\Core\Imaging\IconProvider\SvgIconProvider::class,
+            [
+                'source' => 'EXT:container/Resources/Public/Icons/' . $icon . '.svg',
+            ]
+        );
+    }
+
     // EXT:content_defender
     $packageManager = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Package\PackageManager::class);
     if ($packageManager->isPackageActive('content_defender')) {
-
         $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['cms']['db_new_content_el']['wizardItemsHook']['tx_container-content-defender'] =
             \B13\Container\ContentDefender\Hooks\WizardItems::class;
         $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup']['tcaDatabaseRecord'][ \B13\Container\ContentDefender\Form\FormDataProvider\TcaCTypeItems::class] = [

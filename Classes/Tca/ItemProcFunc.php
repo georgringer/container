@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace B13\Container\Tca;
 
 /*
@@ -10,10 +12,10 @@ namespace B13\Container\Tca;
  * of the License, or any later version.
  */
 
+use B13\Container\Domain\Factory\ContainerFactory;
 use B13\Container\Domain\Factory\Exception;
 use TYPO3\CMS\Backend\View\BackendLayoutView;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use B13\Container\Domain\Factory\ContainerFactory;
 
 class ItemProcFunc
 {
@@ -21,23 +23,22 @@ class ItemProcFunc
     /**
      * @var ContainerFactory
      */
-    protected $containerFactory = null;
+    protected $containerFactory;
 
     /**
      * @var BackendLayoutView
      */
-    protected $backendLayoutView = null;
+    protected $backendLayoutView;
 
     /**
      * @var Registry
      */
-    protected $tcaRegistry = null;
-
+    protected $tcaRegistry;
 
     /**
      * ItemProcFunc constructor.
      * @param ContainerFactory|null $containerFactory
-     * @param \B13\Container\Tca\Registry|null $tcaRegistry
+     * @param Registry|null $tcaRegistry
      * @param BackendLayoutView|null $backendLayoutView
      */
     public function __construct(ContainerFactory $containerFactory = null, Registry $tcaRegistry = null, BackendLayoutView $backendLayoutView = null)
@@ -59,7 +60,7 @@ class ItemProcFunc
         $row = $parameters['row'];
         if ($row['tx_container_parent'] > 0) {
             try {
-                $container = $this->containerFactory->buildContainer($row['tx_container_parent']);
+                $container = $this->containerFactory->buildContainer((int)$row['tx_container_parent']);
                 $cType = $container->getCType();
                 $grid = $this->tcaRegistry->getGrid($cType);
                 if (is_array($grid)) {
@@ -79,7 +80,6 @@ class ItemProcFunc
                     return;
                 }
             } catch (Exception $e) {
-
             }
         }
 
@@ -95,7 +95,7 @@ class ItemProcFunc
         $items = [];
         if ($row['tx_container_parent'] > 0) {
             try {
-                $container = $this->containerFactory->buildContainer($row['tx_container_parent']);
+                $container = $this->containerFactory->buildContainer((int)$row['tx_container_parent']);
                 $cType = $container->getCType();
                 $items[] = [
                     $cType,
@@ -115,5 +115,4 @@ class ItemProcFunc
         }
         $parameters['items'] = $items;
     }
-
 }
